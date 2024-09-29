@@ -23,7 +23,18 @@ const Statistics=(props)=>{
 }
 
 const StatisticsLine=(props)=>{
-  return(<p> {props.text} {props.value}</p>)
+  return(<>
+  <table>
+    <tbody>
+  <tr>
+    <th>{props.text}</th> 
+    <td></td>
+    <td>{props.value}</td>
+  </tr> 
+  </tbody>
+  </table>
+  </>
+  )
 }
 
 const App = () => {
