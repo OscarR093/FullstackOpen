@@ -9,6 +9,7 @@ const Button=(props) =>{
 }
 
 const Statistics=(props)=>{
+  if(props.values[3]===0) return <><h2>Statistics</h2><p>No feedback given</p></>
   return(
     <><h2>Statistics</h2>
     <p> Good: {props.values[0]}</p>
