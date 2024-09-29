@@ -8,6 +8,18 @@ const Button=(props) =>{
   )
 }
 
+const Statistics=(props)=>{
+  return(
+    <><h2>Statistics</h2>
+    <p> Good: {props.values[0]}</p>
+    <p>Neutral: {props.values[1]}</p>
+    <p>Bad: {props.values[2]}</p>
+    <p>Total: {props.values[3]}</p>
+    <p>Average: {props.values[4]}</p>
+    <p>Positive: {props.values[5]}%</p></>
+  )
+}
+
 const App = () => {
   // guarda los clics de cada botón en su propio estado
   const [good, setGood] = useState(0)
@@ -16,14 +28,13 @@ const App = () => {
   const [total, setTotal]=useState(0)
   const [average, setAverage]=useState(0)
   const[percent, setPercent]=useState(0)
+  const values= [good,neutral,bad,total,average,percent]
 
   const calcAverage=(actualTotal, value)=>{const av=(good-bad+value)/actualTotal
     setAverage(av)
   }
 
   const calcPercent=(actualTotal,updatedGood)=> {
-    console.log(actualTotal)
-    console.log(updatedGood)
     if(typeof updatedGood === 'undefined') {return((good*100)/actualTotal)}
     return((updatedGood*100)/actualTotal)
   }
@@ -61,13 +72,7 @@ const App = () => {
         <Button handleClick={handleNeutralClick} text="Neutral :| "/>
         <Button handleClick={handleBadClick} text="Bad :( "/>
       </nav>
-      <h2>Statistics</h2>
-      <p> Good: {good}</p>
-      <p>Neutral: {neutral}</p>
-      <p>Bad: {bad}</p>
-      <p>Total: {total}</p>
-      <p>Average: {average}</p>
-      <p>Positive: {percent}%</p>
+      <Statistics values={values}/>
     </div>
   )
 }
