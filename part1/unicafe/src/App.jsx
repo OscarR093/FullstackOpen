@@ -12,13 +12,18 @@ const Statistics=(props)=>{
   if(props.values[3]===0) return <><h2>Statistics</h2><p>No feedback given</p></>
   return(
     <><h2>Statistics</h2>
-    <p> Good: {props.values[0]}</p>
-    <p>Neutral: {props.values[1]}</p>
-    <p>Bad: {props.values[2]}</p>
-    <p>Total: {props.values[3]}</p>
-    <p>Average: {props.values[4]}</p>
-    <p>Positive: {props.values[5]}%</p></>
+    <StatisticsLine text='Good: ' value={props.values[0]} />
+    <StatisticsLine text='Neutral: ' value={props.values[1]} />
+    <StatisticsLine text='Bad: ' value={props.values[2]} />
+    <StatisticsLine text='Total: ' value={props.values[3]} />
+    <StatisticsLine text='Average: ' value={props.values[4]} />
+    <StatisticsLine text='Positive: ' value={props.values[5]+'%'} />
+    </>
   )
+}
+
+const StatisticsLine=(props)=>{
+  return(<p> {props.text} {props.value}</p>)
 }
 
 const App = () => {
