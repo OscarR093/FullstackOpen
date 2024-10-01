@@ -7,13 +7,25 @@ const Button=(props) =>{
   </button>
   )
 }
-const Anecdotes=(props)=>{
+const MostVoted =(props)=>{ 
+  const mostVoted=props.count.indexOf(Math.max(...props.count))
+  return(<>
+<h2>Anecdote with most votes</h2>
+  <div> {props.anecdotes[mostVoted]}  </div>
+  <br />
+  <div>Has {props.count[mostVoted]} Votes</div>
+  <br />
+</>)}
 
+const Anecdotes=(props)=>{
   return(
     <>
+    <h2>Anecdote of the day</h2>
   <div> {props.anecdotes[props.selected]}  </div>
   <br />
   <div>Has {props.count[props.selected]} Votes</div>
+  <br />
+  
  </>
  )
   
@@ -51,6 +63,7 @@ const App = () => {
     <Anecdotes anecdotes={anecdotes} selected={selected} count={count} />
     <Button handleClick={handleSelected} text="Next Anecdote"/>
     <Button handleClick={incrementCount} text="Vote"/>
+    <MostVoted anecdotes={anecdotes} count={count}/>
     </>
   )
 }
