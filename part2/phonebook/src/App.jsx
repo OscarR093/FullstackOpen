@@ -43,7 +43,18 @@ const App = () => {
     const exists = names.includes(newName)
 
     if (exists) {
-      alert(`${newName} is already added to the phonebook`);
+      //alert(`${newName} is already added to the phonebook`);
+      if (window.confirm(`${newName} is already added to the phonebook, replace the old number with a new one?`)) {
+        const person = persons.find(n => n.name === newName)
+        const changedPerson = { ...person, number: newNumber }
+        personService.update(person.id, changedPerson).then(() => {
+          const updatedPersons=persons.map(p=> p.id===person.id? {...p, number: newNumber}:p)
+          setPersons(updatedPersons)
+        }).catch(error => {
+          alert(`The person '${person.name}' cannot update`)
+          setPersons(persons.filter(n => n.id !== id))
+        })
+      }
       setNewName('')
       setNewNumber('')
     } else {
