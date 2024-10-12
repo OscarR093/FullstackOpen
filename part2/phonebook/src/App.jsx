@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import Person from './components/Person'
+import personService from './services/persons'
 
 const Filter=(props)=>{
 return(<div>
@@ -36,11 +37,11 @@ const App = () => {
   const [filteredPersons, setFilteredPersons] = useState(persons) // Nuevo estado para personas filtradas
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
-        setFilteredPersons(response.data)
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
+        setFilteredPersons(initialPersons)
       })
   }, [])
 
@@ -57,8 +58,13 @@ const App = () => {
     } else {
       const personObject = { name: newName, number: newNumber }
       const updatedPersons = persons.concat(personObject)
-      setPersons(updatedPersons)
-      setFilteredPersons(updatedPersons) // Actualiza la lista filtrada también
+      personService
+      .create(personObject)
+      .then(returnedPerson => {
+        const actualPersons=persons.concat(returnedPerson)
+        setPersons(actualPersons)
+        setFilteredPersons(actualPersons)
+      })
       setNewName('')
       setNewNumber('')
     }
