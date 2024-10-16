@@ -17,6 +17,20 @@ const Notification = ({ message }) => {
   )
 }
 
+const Error=({message})=>{
+
+  if (message === null) {
+    return null
+  }
+
+  return (
+    <div className="error">
+      {message}
+    </div>
+  )
+
+}
+
 const Filter = (props) => {
   return (
     <div>
@@ -45,6 +59,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [newFiltered, setNewFiltered] = useState('')
   const [notificationMessage, setNotificationMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
     personService.getAll().then(initialPersons => {
@@ -65,10 +80,26 @@ const App = () => {
         const changedPerson = { ...person, number: newNumber }
         personService.update(person.id, changedPerson).then(() => {
           const updatedPersons=persons.map(p=> p.id===person.id? {...p, number: newNumber}:p)
+            
+          setNotificationMessage(
+            `updated ${newName}!`
+          )
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 5000)
+
           setPersons(updatedPersons)
         }).catch(error => {
-          alert(`The person '${person.name}' cannot update`)
-          setPersons(persons.filter(n => n.id !== id))
+
+          setErrorMessage(
+            `${newName} is already removed from server!`
+          )
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 5000)
+
+          //alert(`The person '${person.name}' cannot update`)
+          setPersons(persons.filter(n => n.id !== person.id))
         })
       }
       setNewName('')
@@ -125,6 +156,7 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
       <Notification message={notificationMessage} />
+      <Error message={errorMessage} />
       <Filter value={newFiltered} onChange={handleFilterChange} />
       <h3>Add a new</h3>
       <PersonForm
