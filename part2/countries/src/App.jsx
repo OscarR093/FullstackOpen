@@ -2,8 +2,31 @@ import { useState, useEffect } from 'react'
 import serviceCountries from './services/countries '
 import Country from './components/country'
 
+const Weather = ({ lat, lon, countryName }) => {
+  const [weather, setWeather] = useState(null); // Estado inicial en null
+
+  useEffect(() => {
+    serviceCountries.getWeather(lat, lon).then((weatherResponse) => {
+      setWeather(weatherResponse);
+    });
+  }, [lat, lon]) // Solo vuelve a ejecutarse si lat o lon cambian
+
+  if (!weather) {
+    return <p>Loading weather...</p>; // Mientras carga la info del clima
+  }
+  const iconurl=`https://openweathermap.org/img/wn/${weather.weather[0].icon}.png`
+  return (
+    <>
+      <h2>Weather in {countryName}</h2>
+      <p>Temperature: {weather.main.temp} °C</p>
+      <p>Wind: {weather.wind.speed} m/s</p>
+      <img src={iconurl} alt={`icon of time in ${countryName}`} width={100} height={"auto"} />
+    </>
+  );
+}
 
 const SingleCountry=({country})=>{
+  
 return(
   <>
   <h1>{country.name.common}</h1>
@@ -18,6 +41,7 @@ return(
         ))}
       </ul>
   <img src={country.flags.svg} width={200} height={"auto"} alt={`Flag of ${country.name.common}`} />
+   <Weather lat={country.latlng[0]} lon={country.latlng[1]} countryName={country.name.common}/>
   </>
 )
 }
@@ -61,6 +85,8 @@ const App = () => {
     console.log({country})
      setCountryToShow(country)
   }
+
+  
 
  
   const filteredCountry = countries.filter(country =>
