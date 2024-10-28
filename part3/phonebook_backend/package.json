@@ -1,5 +1,5 @@
 {
-  "name": "notes_backend",
+  "name": "phonebook_backend",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -7,12 +7,13 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js"
   },
-  "author": "Oscar093",
-  "license": "MIT",
+  "author": "",
+  "license": "ISC",
   "description": "",
   "dependencies": {
-    "express": "4.21.1"
-  },
+    "express": "^4.21.1"
+  }
+  ,
   "devDependencies": {
   "nodemon": "^3.1.7"
   }
