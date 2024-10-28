@@ -36,12 +36,12 @@ return(
       <ul>
         {Object.entries(country.languages).map(([key, language], index) => (
           <li key={index}>
-             {language}
+          {language}
           </li>
         ))}
       </ul>
   <img src={country.flags.svg} width={200} height={"auto"} alt={`Flag of ${country.name.common}`} />
-   <Weather lat={country.latlng[0]} lon={country.latlng[1]} countryName={country.name.common}/>
+  <Weather lat={country.latlng[0]} lon={country.latlng[1]} countryName={country.name.common}/>
   </>
 )
 }
@@ -73,7 +73,7 @@ const App = () => {
     serviceCountries.getAll().then(allCountries => {
       setCountries(allCountries)
     })   
-   }, [])
+    }, [])
 
   const handleChange = (event) => {
     setValue(event.target.value)
@@ -83,12 +83,9 @@ const App = () => {
 
   const showCountry=(country)=>{
     console.log({country})
-     setCountryToShow(country)
+    setCountryToShow(country)
   }
 
-  
-
- 
   const filteredCountry = countries.filter(country =>
     country.name.common.toLowerCase().includes(value.toLowerCase())
   )
