@@ -8,7 +8,7 @@
     "dev": "nodemon index.js",
     "build:ui": "@powershell Remove-Item -Recurse -Force dist && cd ../../../part2/others/notes && npm run build && @powershell Copy-Item dist -Recurse ../../../part3/others/notes_backend",
     "deploy": "fly deploy",
-    "deploy:full": "npm run build:ui && npm run deploy",    
+    "deploy:full": "npm run build:ui && npm run deploy",
     "logs:prod": "fly logs"
   },
   "author": "Oscar093",
@@ -16,7 +16,8 @@
   "description": "",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "4.21.1"
+    "express": "4.21.1",
+    "mongoose": "8.8.0"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.9",

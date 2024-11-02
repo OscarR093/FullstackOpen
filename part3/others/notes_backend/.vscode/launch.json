@@ -1,0 +1,8 @@
+{
+    "type": "node",
+    "request": "launch",
+    "name": "Iniciar programa",
+    "runtimeExecutable": "C:/Program Files/nodejs", // Cambia esta línea a la ruta de Node.js en tu sistema
+    "program": "${workspaceFolder}/index.js"
+  }
+  
