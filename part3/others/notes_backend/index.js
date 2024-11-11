@@ -1,10 +1,34 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const mongoose = require('mongoose')
+const Note = require('./models/note')
 
 app.use(express.json())
 app.use(express.static('dist'))
 app.use(cors())
+
+//nconst password = process.argv[2]
+const url = process.env.MONGODB_URI
+
+  mongoose.set('strictQuery',false)
+  mongoose.connect(url)
+
+  const noteSchema = new mongoose.Schema({
+    content: String,
+    important: Boolean,
+  })
+
+  noteSchema.set('toJSON', {
+    transform: (document, returnedObject) => {
+      returnedObject.id = returnedObject._id.toString()
+      delete returnedObject._id
+      delete returnedObject.__v
+    }
+  })
+
+  const Note = mongoose.model('Note', noteSchema)
 
 let notes = [
   {
@@ -42,9 +66,13 @@ app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
+//obtener todas las notas de la DB
 app.get('/api/notes', (request, response) => {
-  response.json(notes)
+  Note.find({}).then(notes => {
+    response.json(notes)
+  })
 })
+
 
 app.get('/api/notes/:id', (request, response) => {
   const id = Number(request.params.id)
@@ -102,7 +130,7 @@ app.put('/api/notes/:id', (request, response) => {
   response.json(updatedNote) // Envía la nota actualizada como respuesta
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })

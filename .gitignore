@@ -1,0 +1,24 @@
+# Node.js modules
+node_modules/
+
+# Entornos de producción y configuración local
+.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Carpetas de compilación
+dist/
+build/
+
+# Archivos temporales de tu editor de texto
+*.swp
+*.swo
+.vscode/
+.idea/
