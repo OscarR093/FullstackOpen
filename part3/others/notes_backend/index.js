@@ -9,44 +9,6 @@ app.use(express.json())
 app.use(express.static('dist'))
 app.use(cors())
 
-//nconst password = process.argv[2]
-const url = process.env.MONGODB_URI
-
-  mongoose.set('strictQuery',false)
-  mongoose.connect(url)
-
-  const noteSchema = new mongoose.Schema({
-    content: String,
-    important: Boolean,
-  })
-
-  noteSchema.set('toJSON', {
-    transform: (document, returnedObject) => {
-      returnedObject.id = returnedObject._id.toString()
-      delete returnedObject._id
-      delete returnedObject.__v
-    }
-  })
-
-  const Note = mongoose.model('Note', noteSchema)
-
-let notes = [
-  {
-    id: 1,
-    content: 'HTML is easy',
-    important: true
-  },
-  {
-    id: 2,
-    content: 'Browser can execute only JavaScript',
-    important: false
-  },
-  {
-    id: 3,
-    content: 'GET and POST are the most important methods of HTTP protocol',
-    important: true
-  }
-]
 
 const generateId = () => {
   const maxId = notes.length > 0
@@ -73,17 +35,23 @@ app.get('/api/notes', (request, response) => {
   })
 })
 
-
+//obtener notas por id
 app.get('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const note = notes.find(note => note.id === id)
-
-  if (note) {
-    response.json(note)
-  } else {
-    response.status(404).end()
-  }
+  const id = request.params.id// No es necesario convertir `id` a un número
+  Note.findById(id)
+    .then(note => {
+      if (note) {
+        response.json(note);
+      } else {
+        response.status(404).send({ error: 'Note not found' })
+      }
+    })
+    .catch(error => {
+      console.error(error);
+      response.status(500).send({ error: 'An error occurred' })
+    })
 })
+
 
 app.delete('/api/notes/:id', (request, response) => {
   const id = Number(request.params.id)
@@ -95,40 +63,44 @@ app.delete('/api/notes/:id', (request, response) => {
 app.post('/api/notes', (request, response) => {
   const body = request.body
 
-  if (!body.content) {
-    return response.status(400).json({
-      error: 'content missing'
-    })
+  if (body.content === undefined) {
+    return response.status(400).json({ error: 'content missing' })
   }
 
-  const note = {
-    id: generateId(),
+  const note = new Note({
     content: body.content,
-    important: Boolean(body.important) || false
+    important: body.important || false,
+  })
 
-  }
-
-  notes = notes.concat(note)
-
-  response.json(note)
+  note.save().then(savedNote => {
+    response.json(savedNote)
+  })
 })
 
-app.put('/api/notes/:id', (request, response) => {
-  const id = Number(request.params.id) // Obtén el ID desde los parámetros de la URL
-  const body = request.body
+app.put('/api/notes/:id', (request, response) => { 
+  const id = request.params.id; // Obtén el ID desde los parámetros de la URL
+  const body = request.body;
 
-  const note = notes.find(note => note.id === id)
-  if (!note) {
-    return response.status(404).json({
-      error: 'note not found'
+  const updatedNote = {
+    important: body.important, 
+    content: body.content  // Incluye cualquier campo que quieras actualizar
+  };
+
+  // Utiliza findByIdAndUpdate para buscar y actualizar el documento en un solo paso
+  Note.findByIdAndUpdate(id, updatedNote, { new: true, runValidators: true })
+    .then(note => {
+      if (note) {
+        response.json(note); // Envía la nota actualizada como respuesta
+      } else {
+        response.status(404).send({ error: 'Note not found' });
+      }
     })
-  }
+    .catch(error => {
+      console.error(error);
+      response.status(500).send({ error: 'An error occurred' });
+    });
+});
 
-  const updatedNote = { ...note, important: body.important } // Crea una nueva nota con los datos actualizados
-  notes = notes.map(note => note.id === id ? updatedNote : note) // Actualiza el arreglo
-
-  response.json(updatedNote) // Envía la nota actualizada como respuesta
-})
 
 const PORT = process.env.PORT 
 app.listen(PORT, () => {
