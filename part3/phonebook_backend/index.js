@@ -1,6 +1,9 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
+const cors=require('cors')
 const app = express()
+const Person=require('./models/person')
 
 app.use(express.json())
 app.use(express.static('dist'))
@@ -60,7 +63,9 @@ app.get('/info', (request, response) => {
 
 // mostrar todas las personas
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
 })
 
 // obtener solo una persona a traves de la url con el id
