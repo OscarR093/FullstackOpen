@@ -90,9 +90,9 @@ const App = () => {
 
           setPersons(updatedPersons)
         }).catch(error => {
-
+          console.log(error.response.data.error)
           setErrorMessage(
-            `${newName} is already removed from server!`
+            error.response.data.error
           )
           setTimeout(() => {
             setErrorMessage(null)
@@ -116,6 +116,10 @@ const App = () => {
           setNotificationMessage(null)
         }, 5000)
 
+      }).catch(error => {
+        // está es la forma de acceder al mensaje de error
+        console.log(error.response.data.error)
+        setErrorMessage(error.response.data.error)
       })
       setNewName('')
       setNewNumber('')

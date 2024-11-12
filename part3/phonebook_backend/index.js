@@ -8,14 +8,20 @@ app.use(express.json())
 app.use(express.static('dist'))
 // manejo de errores 
 const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
+  console.error(error.message);
 
   if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
+    // Error al buscar por un ID malformado
+    return response.status(400).json({ error: 'malformatted id' });
+  } else if (error.name === 'ValidationError') {
+    // Error de validación de Mongoose
+    return response.status(400).json({ error: error.message });
   } 
 
-  next(error)
-}
+  // Para cualquier otro error, asegúrate de enviar un mensaje genérico
+  return response.status(500).json({ error: 'An unexpected error occurred' });
+};
+
 // starts morgan configuration
 // Middleware personalizado para almacenar el body en req.body
 app.use((req, res, next) => {

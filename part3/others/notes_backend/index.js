@@ -13,7 +13,9 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  } 
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  }
 
   next(error)
 }
@@ -63,39 +65,33 @@ app.delete('/api/notes/:id', (request, response) => {
 app.post('/api/notes', (request, response, next) => {
   const body = request.body
 
-  if (body.content === undefined) {
-    return response.status(400).json({ error: 'content missing' })
-  }
-
   const note = new Note({
     content: body.content,
     important: body.important || false,
   })
 
-  note.save().then(savedNote => {
-    response.json(savedNote)
-  }).catch(error =>  next(error))
+  note.save()
+    .then(savedNote => {
+      response.json(savedNote)
+    })
+
+    .catch(error => next(error))
 })
 
-app.put('/api/notes/:id', (request, response, next) => { 
-  const id = request.params.id // Obtén el ID desde los parámetros de la URL
-  const body = request.body
+app.put('/api/notes/:id', (request, response, next) => {
 
-  const updatedNote = {
-    important: body.important, 
-    content: body.content  // Incluye cualquier campo que quieras actualizar
-  }
+  const { content, important } = request.body
 
-  // Utiliza findByIdAndUpdate para buscar y actualizar el documento en un solo paso
-  Note.findByIdAndUpdate(id, updatedNote, { new: true, runValidators: true })
-    .then(note => {
-      if (note) {
-        response.json(note); // Envía la nota actualizada como respuesta
-      } else {
-        response.status(404).send({ error: 'Note not found' })
-      }
+  Note.findByIdAndUpdate(
+    request.params.id, 
+
+    { content, important },
+    { new: true, runValidators: true, context: 'query' }
+  ) 
+    .then(updatedNote => {
+      response.json(updatedNote)
     })
-    .catch(error =>  next(error))
+    .catch(error => next(error))
 })
 
 
