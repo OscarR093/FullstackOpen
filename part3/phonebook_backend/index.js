@@ -1,35 +1,12 @@
 require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
-const cors=require('cors')
 const app = express()
 const Person=require('./models/person')
 
 app.use(express.json())
 app.use(express.static('dist'))
 
-let persons = [
-  {
-    id: 1,
-    name: 'Arto Hellas',
-    number: '040-123456'
-  },
-  {
-    id: 2,
-    name: 'Ada Lovelace',
-    number: '39-44-5323523'
-  },
-  {
-    id: 3,
-    name: 'Dan Abramov',
-    number: '12-43-234345'
-  },
-  {
-    id: 4,
-    name: 'Mary Poppendieck',
-    number: '39-23-6423122'
-  }
-]
 // starts morgan configuration
 // Middleware personalizado para almacenar el body en req.body
 app.use((req, res, next) => {
@@ -43,22 +20,18 @@ morgan.token('body', (req) => req.bodyData || '') // Agrega el token 'body' para
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 // ends morgan configuration
 
-// id generado
-const generateId = () => {
-  const maxId = persons.length > 0
-    ? Math.max(...persons.map(n => n.id))
-    : 0
-    // Generar un ID alto aleatorio
-  const randomId = maxId + Math.floor(Math.random() * 1000000) + 1
-  return randomId
-}
-
 // mostrar pagina de informacion
 app.get('/info', (request, response) => {
-  const numberOFPersons = persons.length
   const fechaActual = new Date()
-  const message = '<p>Phonebook has info for ' + numberOFPersons + ' people.</p>' + '<p>' + fechaActual + '</p>'
-  response.send(message)
+  Person.countDocuments({})
+  .then(count => {
+    // Ahora `count` contiene el total de documentos
+    response.send('<p>Phonebook has info for ' +count+ ' people.</p>' + '<p>' + fechaActual + '</p>')
+  })
+  .catch(error => {
+    console.error(error)
+    response.status(500).send({ error: 'An error occurred' })
+  });
 })
 
 // mostrar todas las personas
@@ -70,62 +43,60 @@ app.get('/api/persons', (request, response) => {
 
 // obtener solo una persona a traves de la url con el id
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(person => person.id === id)
-
-  if (person) {
-    response.json(person)
-  } else {
-    response.status(404).end()
-  }
+  const id = request.params.id// No es necesario convertir `id` a un número
+  Person.findById(id)
+    .then(person => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).send({ error: 'Note not found' })
+      }
+    })
+    .catch(error => {
+      console.error(error);
+      response.status(500).send({ error: 'An error occurred' })
+    })
 })
 
 // borrar personas de la agenda
 
 app.delete('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  persons = persons.filter(person => person.id !== id)
+  const id = request.params.id // No es necesario convertir `id` a un número
 
-  response.status(204).end()
+  Person.findByIdAndDelete(id)
+    .then(person => {
+      if (person) {
+        response.status(204).end(); // Devuelve 204 No Content si la persona fue eliminada
+      } else {
+        response.status(404).send({ error: 'Person not found' })
+      }
+    })
+    .catch(error => {
+      console.error(error)
+      response.status(500).send({ error: 'An error occurred' });
+    })
 })
-
 // agregar personas a la agenda
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
-  // comprobar nombre
-  if (!body.name) {
-    return response.status(400).json({
-      error: 'name is missing'
-    })
-  }
-  // comprobar numero telefonico
-  if (!body.number) {
-    return response.status(400).json({
-      error: 'number is missing'
-    })
-  }
-  // comprobar si el nombre ya ha sido registrado
-  const nameIsAlreadyRegistered = persons.filter(person => person.name === body.name)
-  console.log(nameIsAlreadyRegistered.length)
-  if (nameIsAlreadyRegistered.length > 0) {
-    return response.status(400).json({
-      error: 'name is already registered'
-    })
-  }
-  // crear el el objeto persona a agregar
-  const person = {
-    id: generateId(),
-    name: body.name,
-    number: body.number
 
+  if (body.name === undefined) {
+  return response.status(400).json({ error: 'content missing' })
   }
-  persons = persons.concat(person)
-  response.json(person)
+
+  const person = new Person({
+    name: body.name,
+    number: body.number || false,
+  })
+
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
 })
 
 // conexion al puerto y mensaje de servidor activo
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
