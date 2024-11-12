@@ -2,20 +2,22 @@ require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const mongoose = require('mongoose')
 const Note = require('./models/note')
 
 app.use(express.json())
 app.use(express.static('dist'))
 app.use(cors())
 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
 
-const generateId = () => {
-  const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => n.id))
-    : 0
-  return maxId + 1
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
 }
+
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
   console.log('Path:  ', request.path)
@@ -24,6 +26,7 @@ const requestLogger = (request, response, next) => {
   next()
 }
 app.use(requestLogger)
+
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
@@ -36,7 +39,7 @@ app.get('/api/notes', (request, response) => {
 })
 
 //obtener notas por id
-app.get('/api/notes/:id', (request, response) => {
+app.get('/api/notes/:id', (request, response, next) => {
   const id = request.params.id// No es necesario convertir `id` a un número
   Note.findById(id)
     .then(note => {
@@ -46,10 +49,7 @@ app.get('/api/notes/:id', (request, response) => {
         response.status(404).send({ error: 'Note not found' })
       }
     })
-    .catch(error => {
-      console.error(error);
-      response.status(500).send({ error: 'An error occurred' })
-    })
+    .catch(error =>  next(error))
 })
 
 
@@ -74,12 +74,12 @@ app.post('/api/notes', (request, response) => {
 
   note.save().then(savedNote => {
     response.json(savedNote)
-  })
+  }).catch(error =>  next(error))
 })
 
 app.put('/api/notes/:id', (request, response) => { 
-  const id = request.params.id; // Obtén el ID desde los parámetros de la URL
-  const body = request.body;
+  const id = request.params.id // Obtén el ID desde los parámetros de la URL
+  const body = request.body
 
   const updatedNote = {
     important: body.important, 
@@ -92,17 +92,15 @@ app.put('/api/notes/:id', (request, response) => {
       if (note) {
         response.json(note); // Envía la nota actualizada como respuesta
       } else {
-        response.status(404).send({ error: 'Note not found' });
+        response.status(404).send({ error: 'Note not found' })
       }
     })
-    .catch(error => {
-      console.error(error);
-      response.status(500).send({ error: 'An error occurred' });
-    });
-});
+    .catch(error =>  next(error))
+})
 
 
 const PORT = process.env.PORT 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+app.use(errorHandler)
