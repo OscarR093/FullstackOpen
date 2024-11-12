@@ -60,7 +60,7 @@ app.delete('/api/notes/:id', (request, response) => {
   response.status(204).end()
 })
 
-app.post('/api/notes', (request, response) => {
+app.post('/api/notes', (request, response, next) => {
   const body = request.body
 
   if (body.content === undefined) {
@@ -77,14 +77,14 @@ app.post('/api/notes', (request, response) => {
   }).catch(error =>  next(error))
 })
 
-app.put('/api/notes/:id', (request, response) => { 
+app.put('/api/notes/:id', (request, response, next) => { 
   const id = request.params.id // Obtén el ID desde los parámetros de la URL
   const body = request.body
 
   const updatedNote = {
     important: body.important, 
     content: body.content  // Incluye cualquier campo que quieras actualizar
-  };
+  }
 
   // Utiliza findByIdAndUpdate para buscar y actualizar el documento en un solo paso
   Note.findByIdAndUpdate(id, updatedNote, { new: true, runValidators: true })

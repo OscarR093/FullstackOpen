@@ -6,7 +6,16 @@ const Person=require('./models/person')
 
 app.use(express.json())
 app.use(express.static('dist'))
+// manejo de errores 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
 
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
 // starts morgan configuration
 // Middleware personalizado para almacenar el body en req.body
 app.use((req, res, next) => {
@@ -28,10 +37,7 @@ app.get('/info', (request, response) => {
     // Ahora `count` contiene el total de documentos
     response.send('<p>Phonebook has info for ' +count+ ' people.</p>' + '<p>' + fechaActual + '</p>')
   })
-  .catch(error => {
-    console.error(error)
-    response.status(500).send({ error: 'An error occurred' })
-  });
+  .catch(error =>  next(error))
 })
 
 // mostrar todas las personas
@@ -42,7 +48,7 @@ app.get('/api/persons', (request, response) => {
 })
 
 // obtener solo una persona a traves de la url con el id
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   const id = request.params.id// No es necesario convertir `id` a un número
   Person.findById(id)
     .then(person => {
@@ -52,15 +58,12 @@ app.get('/api/persons/:id', (request, response) => {
         response.status(404).send({ error: 'Note not found' })
       }
     })
-    .catch(error => {
-      console.error(error);
-      response.status(500).send({ error: 'An error occurred' })
-    })
+    .catch(error =>  next(error))
 })
 
 // borrar personas de la agenda
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   const id = request.params.id // No es necesario convertir `id` a un número
 
   Person.findByIdAndDelete(id)
@@ -71,14 +74,11 @@ app.delete('/api/persons/:id', (request, response) => {
         response.status(404).send({ error: 'Person not found' })
       }
     })
-    .catch(error => {
-      console.error(error)
-      response.status(500).send({ error: 'An error occurred' });
-    })
+    .catch(error =>  next(error))
 })
 // agregar personas a la agenda
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   if (body.name === undefined) {
@@ -92,11 +92,36 @@ app.post('/api/persons', (request, response) => {
 
   person.save().then(savedPerson => {
     response.json(savedPerson)
-  })
+  }).catch(error =>  next(error))
 })
+
+//modificar personas de la agenda
+
+app.put('/api/persons/:id', (request, response, next) => { 
+  const id = request.params.id // Obtén el ID desde los parámetros de la URL
+  const body = request.body
+
+  const updatedPerson = {
+    name: body.name, 
+    number: body.number  // Incluye cualquier campo que quieras actualizar
+  }
+
+  // Utiliza findByIdAndUpdate para buscar y actualizar el documento en un solo paso
+  Person.findByIdAndUpdate(id, updatedPerson, { new: true, runValidators: true })
+    .then(person => {
+      if (person) {
+        response.json(person); // Envía la nota actualizada como respuesta
+      } else {
+        response.status(404).send({ error: 'Person not found' })
+      }
+    })
+    .catch(error =>  next(error))
+})
+
 
 // conexion al puerto y mensaje de servidor activo
 const PORT = process.env.PORT 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+app.use(errorHandler)
