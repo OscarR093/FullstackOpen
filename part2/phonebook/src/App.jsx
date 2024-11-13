@@ -117,9 +117,12 @@ const App = () => {
         }, 5000)
 
       }).catch(error => {
-        // está es la forma de acceder al mensaje de error
+        
         console.log(error.response.data.error)
-        setErrorMessage(error.response.data.error)
+        setErrorMessage(error.response.data.error); // Muestra el mensaje inmediatamente
+        setTimeout(() => {
+          setErrorMessage(null); // Borra el mensaje después de 5 segundos
+        }, 5000);
       })
       setNewName('')
       setNewNumber('')

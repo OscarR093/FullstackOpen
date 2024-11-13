@@ -24,7 +24,18 @@ const noteSchema = new mongoose.Schema({
     minLength: 3,
     required: true
   },
-  number: String,
+  number: {
+    type: String,
+    minLength:8,
+    validate: {
+      validator: function(v) {
+        // La primera parte tiene 2 o 3 dígitos, la segunda parte tiene 1 o más dígitos
+        return /^\d{2,3}-\d+$/.test(v);
+      },
+      message: props => `${props.value} is not a valid phone number format!`
+    },
+    required: [true, 'User phone number required']
+  }
 })
 
 noteSchema.set('toJSON', {

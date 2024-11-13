@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
     "firstBuild": "cd ../../part2/phonebook && npm run build && @powershell Copy-Item dist -Recurse ../../part3/phonebook_backend",
-    "build:ui": "@powershell Remove-Item -Recurse -Force dist && cd ../../part2/phonebook && npm run build && @powershell Copy-Item dist -Recurse ../../../part3/phonebook_backend",
+    "build:ui": "@powershell Remove-Item -Recurse -Force dist && cd ../../part2/phonebook && npm run build && @powershell Copy-Item dist -Recurse ../../part3/phonebook_backend",
     "deploy": "fly deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
     "logs:prod": "fly logs"
